@@ -1,14 +1,13 @@
 package com.fadhilradh;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @SpringBootApplication
 @RestController
@@ -29,21 +28,33 @@ public class Main {
         return customerRepository.findAll();
     }
 
-    @GetMapping("/greet")
-    public GreetResponse salam() {
-        GreetResponse response = new GreetResponse(
-                "Salam",
-                List.of("coding", "being grateful"),
-                new Person("Fadhil", 29, 30_000)
-        );
-
-        return response;
+    @PostMapping
+    public void postCustomer(@RequestBody CustomerRequest customerRequest) {
+        Customer customer = new Customer();
+        customer.setName(customerRequest.name);
+        customer.setAge(customerRequest.age);
+        customer.setSavings(customerRequest.savings);
+        customerRepository.save(customer);
     }
 
-    record GreetResponse(String salam, List<String> hobbies, Person person) {
+    @DeleteMapping("{customerId}")
+    public void deleteCustomer(@PathVariable("customerId") int id) {
+        customerRepository.deleteById(id);
     }
 
-    record Person(String name, int age, double savings) {
+    @PutMapping("{customerId}")
+    public ResponseEntity<Customer> updateCustomer(@PathVariable("customerId") int id, @RequestBody CustomerRequest customerRequest) {
+       Customer customer = customerRepository.findById(id)
+               .orElseThrow(()-> new EntityNotFoundException("Employee not exist"));
+
+       customer.setName(customerRequest.name);
+       customer.setAge(customerRequest.age);
+       customer.setSavings(customerRequest.savings);
+
+       customerRepository.save(customer);
+       return ResponseEntity.ok(customer);
     }
+
+    record CustomerRequest(String name, int age, double savings) {}
 }
 
