@@ -36,4 +36,14 @@ public class CustomerController {
     public void postCustomer(@RequestBody CustomerRequest customerRequest) {
         customerService.postCustomer(customerRequest);
     }
+
+    @DeleteMapping("{customerId}")
+    public void deleteCustomer(@PathVariable("customerId") int id) {
+        customerService.deleteCustomer(id);
+    }
+
+    @PutMapping("{customerId}")
+    public void updateCustomer(@PathVariable("customerId") int id, @RequestBody CustomerRequest customerRequest) {
+       customerService.updateCustomer(id, customerRequest);
+    }
 }
